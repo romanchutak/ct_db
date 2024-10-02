@@ -1,0 +1,38 @@
+services:
+  db:
+    image: mysql:5.7
+    restart: on-failure
+    command:
+        - --sql_mode=NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+        - --default-authentication-plugin=mysql_native_password
+        - --innodb_ft_min_token_size=3
+        - --ft_min_word_len=3
+    env_file:
+        - ./.env
+    environment:
+        MYSQL_ROOT_PASSWORD: ${DATABASE_PASS}
+        MYSQL_DATABASE: ${DATABASE_NAME}
+        MYSQL_USER: ${MYSQL_USER}
+        MYSQL_USER_PASSWORD: ${MYSQL_USER_PASSWORD}
+        TZ: 'Asia/Yekaterinburg'
+    ports:
+        - '${DATABASE_PORT}:${DATABASE_PORT}'
+    volumes:
+        - ./data:/var/lib/mysql
+    healthcheck:
+        test:
+            [
+                'CMD-SHELL',
+                'mysql -h localhost -u${DATABASE_USERNAME} -p${DATABASE_PASS}',
+            ]
+        interval: 10s
+        timeout: 5s
+        retries: 10
+    networks:
+        - traefik_public
+
+networks:
+  traefik_puplic:
+      external: true
+      name: traefik_puplic
+      
